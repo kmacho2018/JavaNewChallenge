@@ -2,19 +2,22 @@ package com.example.javacodingchallenge.service;
 
 import com.example.javacodingchallenge.dao.repository.CategoryRepository;
 import com.example.javacodingchallenge.models.Category;
-import com.example.javacodingchallenge.models.KeyWord;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import static org.mockito.Mockito.when;
 
+/**
+ * @author Juan Camacho
+ */
+@ExtendWith(MockitoExtension.class)
 public class CategoryServiceTest {
     @Mock
     private CategoryRepository categoryRepositoryMock;
@@ -23,21 +26,20 @@ public class CategoryServiceTest {
     private CategoryService categoryService;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
-    public void getCategoryByName(){
-        Category category = new Category();
-        Mockito.when(categoryRepositoryMock.findByName("Lawn And Garden")).thenReturn(category);
-        Assert.assertNotNull(category);
+    @BeforeEach
+    void initUseCase() {
+        categoryService = new CategoryService(categoryRepositoryMock);
     }
 
     @Test
-    public void getKeyWordByCategory(){
-        List<KeyWord> keyWordList = new ArrayList<>();
-        Mockito.when(categoryService.getKeyWordsByCategoryId(3)).thenReturn(keyWordList);
-        Assert.assertNotNull(keyWordList);
+    public void testGetCategoryByName() {
+        Category category = new Category();
+        when(categoryRepositoryMock.findByName("Lawn And Garden")).thenReturn(category);
+        Category fetchedCategory = categoryService.getCategoryByName("Lawn And Garden");
+        Assert.assertEquals(category, fetchedCategory);
     }
 }

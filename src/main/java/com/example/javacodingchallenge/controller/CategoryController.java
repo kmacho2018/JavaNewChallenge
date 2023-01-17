@@ -1,7 +1,6 @@
 package com.example.javacodingchallenge.controller;
 
 import com.example.javacodingchallenge.models.Category;
-import com.example.javacodingchallenge.models.KeyWord;
 import com.example.javacodingchallenge.service.CategoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
+/**
+ * @author Juan Camacho
+ */
 @RestController
 public class CategoryController {
 
@@ -25,30 +26,40 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    /**
+     * Operation to get List of Keywords by Category Name
+     * @param categoryName
+     * @return
+     */
     @GetMapping("/category/getKeyWords")
     public Set<String> getKeyWordsByCategoryName(@RequestParam(name = "CategoryName") String categoryName) {
-        Category category = categoryService.getCategoryByName(categoryName);
-        List<String> keyWordList = new ArrayList<>();
-        if (category != null) {
-            keyWordList = category.getKeyWords().stream().map(KeyWord::getName).collect(Collectors.toList());
-            if (category.getParentCategoryId() != null) {
-                List<KeyWord> parentKeyWords = categoryService.getKeyWordsByCategoryId(category.getParentCategoryId());
-                for (KeyWord keyword : parentKeyWords) {
-                    keyWordList.add(keyword.getName());
-                }
-            }
+        Set<String> keyWordList = null;
+        try {
+             keyWordList = categoryService.getKeyWordsByCategoryName(categoryName);
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage());
         }
-        return new LinkedHashSet<>(keyWordList);
+        return keyWordList;
     }
 
+    /**
+     * Operation to get of level by Category Name
+     * @param categoryName
+     * @return
+     */
     @GetMapping("/category/getLevelCategory")
     public String getCategoryLevel(@RequestParam(name = "CategoryName") String categoryName) {
         Category category = categoryService.getCategoryByName(categoryName);
-        if (category.getParentCategoryId() != null) {
-            Category parentCategory = categoryService.getCategoryByCategoryId(category.getParentCategoryId());
-            return "The Category " + category.getName() + " Is Subcategory of " + parentCategory.getName();
-        } else {
-            return "The Category " + category.getName() + " Is the part of Main Categories.";
+        try {
+            if (category.getParentCategoryId() != null) {
+                Category parentCategory = categoryService.getCategoryByCategoryId(category.getParentCategoryId());
+                return "The Category " + category.getName() + " Is Subcategory of " + parentCategory.getName();
+            } else {
+                return "The Category " + category.getName() + " Is the part of Main Categories.";
+            }
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage());
+            return ex.getMessage();
         }
     }
 }
